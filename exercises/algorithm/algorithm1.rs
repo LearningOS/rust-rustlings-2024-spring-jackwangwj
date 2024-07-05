@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,12 +71,36 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+
+        let mut node = LinkedList::<T>::new();
+        let mut node_a = list_a.start;
+        let mut node_b = list_b.start;
+        unsafe{
+            while node_a.is_some() || node_b.is_some() {
+                if node_a.is_none() && node_b.is_some() {
+                    let val_b = &node_b.unwrap().as_ref().val;
+                    node.add(val_b.to_owned());
+                    node_b = node_b.unwrap().as_ref().next;
+                    continue;
+                }
+                if node_b.is_none() && node_a.is_some() {
+                    let val_a = &node_a.unwrap().as_ref().val;
+                    node.add(val_a.to_owned());
+                    node_a = node_a.unwrap().as_ref().next;
+                    continue;
+                }
+                let val_a = &node_a.unwrap().as_ref().val;
+                let val_b = &node_b.unwrap().as_ref().val;
+                if val_a > val_b{
+                    node.add(val_b.to_owned());
+                    node_b = node_b.unwrap().as_ref().next;
+                } else{
+                    node.add(val_a.to_owned());
+                    node_a = node_a.unwrap().as_ref().next;
+                }
+            }
         }
+        node
 	}
 }
 
